@@ -113,7 +113,7 @@ GROUP BY branch_type, taken;
 
 
 
-
+# micelaneos
 hdfs dfs -ls /home/input/Datasets
 pig load_data.pig
 
