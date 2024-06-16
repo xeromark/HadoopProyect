@@ -8,7 +8,9 @@ https://hub.docker.com/r/suhothayan/hadoop-spark-pig-hive
 
 docker run -it --name analiz -p 50070:50070 -p 8088:8088 -p 8080:8080 suhothayan/hadoop-spark-pig-hive:2.9.2 bash
 
+o tambien:
 
+docker exec -it analiz bash
 
 # 1) Pasar archivo de ubuntu al contenedor
     docker cp ./Datasets.gz analiz:/home
@@ -88,7 +90,25 @@ SELECT COUNT(branch_type), branch_type, taken FROM datos WHERE taken = 1 GROUP B
 
 
 # 5. Crear tablas en Hive para almacenar los resultados de los analisis realizados.
+
+-- Crear la tabla para los resultados
+CREATE TABLE resultados_branch_type (
+    count_branch_type INT,
+    branch_type STRING,
+    taken INT
+);
+
+
+
 # 6. Almacenar los conteos de frecuencia y las relaciones analizadas en tablas separadas en Hive.
+
+-- Insertar los resultados de la consulta en la tabla
+INSERT INTO resultados_branch_type
+SELECT COUNT(branch_type) AS count_branch_type, branch_type, taken
+FROM datos
+GROUP BY branch_type, taken;
+
+
 # 7. Realizar los analisis anteriores para distintas tramas de datos de forma aleatoria, para ello se solicita tomar muestras de potencia de 10, hasta llegar a un punto en que la query tarde un tiempo maximo o cercano a 1h
 
 
