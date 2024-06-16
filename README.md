@@ -91,7 +91,7 @@ SELECT COUNT(branch_type), branch_type, taken FROM datos WHERE taken = 1 GROUP B
 
 # 5. Crear tablas en Hive para almacenar los resultados de los analisis realizados.
 
--- Crear la tabla para los resultados
+
 CREATE TABLE resultados_branch_type (
     count_branch_type INT,
     branch_type STRING,
@@ -102,7 +102,7 @@ CREATE TABLE resultados_branch_type (
 
 # 6. Almacenar los conteos de frecuencia y las relaciones analizadas en tablas separadas en Hive.
 
--- Insertar los resultados de la consulta en la tabla
+
 INSERT INTO resultados_branch_type
 SELECT COUNT(branch_type) AS count_branch_type, branch_type, taken
 FROM datos
