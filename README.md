@@ -86,7 +86,28 @@ LOAD DATA INPATH '/input/Datasets' INTO TABLE datos;
 
 # 2. Contar la frecuencia de cada tipo de branch utilizando Pig y Hive.
 
+Para hive:
+
     SELECT COUNT(branch_type), branch_type FROM datos GROUP BY branch_type;
+
+Para pig:
+
+    datos = LOAD '/home/input/Datasets' 
+        USING PigStorage('\t') 
+        AS (branch_type:chararray, taken:int);
+
+    -- Agrupar por branch_type y taken
+    grouped_data = GROUP datos BY (branch_type, taken);
+
+    -- Contar la frecuencia de cada tipo de branch y taken
+    counted_data = FOREACH grouped_data GENERATE
+    FLATTEN(group) AS (branch_type, taken),
+    COUNT(datos) AS frecuencia;
+
+    -- Filtrar los registros donde taken sea 1
+    filtered_data = FILTER counted_data BY taken == 1;
+
+    DUMP filtered_data;
 
 # 3. Analizar la relacion entre los tipos de branch y el valor de ”taken” (1 o 0) utilizando Pig y Hive
 
