@@ -6,18 +6,21 @@ https://hub.docker.com/r/suhothayan/hadoop-spark-pig-hive
 
 # Pasos previos, Dar nombre del contenedor: "analiz" por analizador
 
-docker run -it --name analiz -p 50070:50070 -p 8088:8088 -p 8080:8080 suhothayan/hadoop-spark-pig-hive:2.9.2 bash
+    docker run -it --name analiz -p 50070:50070 -p 8088:8088 -p 8080:8080 suhothayan/hadoop-spark-pig-hive:2.9.2 bash
 
 o tambien:
 
-docker exec -it analiz bash
+    docker exec -it analiz bash
 
 # 1) Pasar archivo de ubuntu al contenedor
     docker cp ./Datasets.gz analiz:/home
  
 # 2) Crear una carpeta adentro de home con mkdir con nombre input
 
-# 3) Descomprimir archivo
+    mkdir input
+    mv Datasets.gz input
+
+# 3) Descomprimir archivo ya estando en la carpeta input
     gunzip Datasets.gz
 
 # 4) Subir a hdfs 
@@ -54,10 +57,14 @@ docker exec -it analiz bash
     FIELDS TERMINATED BY ','
     STORED AS TEXTFILE;
 
-..................................
+---
+
 Considerar: 
-SELECT * FROM branches;
-SHOW TABLES;
+
+    SELECT * FROM branches;
+    SHOW TABLES;
+
+Para mostrar las tablas
 
 # 7) Subir el archivo de hdfs a hive
 
@@ -65,49 +72,71 @@ SHOW TABLES;
 
 LOAD DATA INPATH '/input/Datasets' INTO TABLE datos;
 
-# <==============================================================================================================================>
-# <==============================================================================================================================>
-
+---
+---
+---
+---
+---
 
 # Preguntas INFORME
 
 # 1. Obtener el numero de registros
 
-SELECT COUNT(*) FROM datos;
+    SELECT COUNT(*) FROM datos;
 
 # 2. Contar la frecuencia de cada tipo de branch utilizando Pig y Hive.
 
-SELECT COUNT(branch_type), branch_type FROM datos GROUP BY branch_type;
+    SELECT COUNT(branch_type), branch_type FROM datos GROUP BY branch_type;
 
 # 3. Analizar la relacion entre los tipos de branch y el valor de ”taken” (1 o 0) utilizando Pig y Hive
 
-SELECT COUNT(branch_type), branch_type, taken FROM datos GROUP BY branch_type, taken;
+    SELECT COUNT(branch_type), branch_type, taken FROM datos GROUP BY branch_type, taken;
 
 
 # 4. Calcular la proporcion de registros con ”taken” igual a 1 para cada tipo de branch.
 
-SELECT COUNT(branch_type), branch_type, taken FROM datos WHERE taken = 1 GROUP BY branch_type, taken;
+    SELECT COUNT(branch_type), branch_type, taken FROM datos WHERE taken = 1 GROUP BY branch_type, taken;
 
 
 # 5. Crear tablas en Hive para almacenar los resultados de los analisis realizados.
 
 
-CREATE TABLE resultados_branch_type (
-    count_branch_type INT,
-    branch_type STRING,
-    taken INT
-);
+    CREATE TABLE resultados_frecuencias (
+        frecuencia INT,
+        branch_type STRING
+    );
 
+    CREATE TABLE resultados_relaciones (
+        frecuencia INT,
+        branch_type STRING,
+        taken INT
+    );
+
+    CREATE TABLE resultados_proporciones (
+        frecuencia INT,
+        branch_type STRING,
+        taken INT
+    );
 
 
 # 6. Almacenar los conteos de frecuencia y las relaciones analizadas en tablas separadas en Hive.
 
 
-INSERT INTO resultados_branch_type
-SELECT COUNT(branch_type) AS count_branch_type, branch_type, taken
-FROM datos
-GROUP BY branch_type, taken;
+    INSERT INTO resultados_frecuencias
+    SELECT COUNT(branch_type), branch_type 
+    FROM datos 
+    GROUP BY branch_type;
 
+    INSERT INTO resultados_relaciones
+    SELECT COUNT(branch_type), branch_type, taken
+    FROM datos 
+    GROUP BY branch_type, taken;
+
+    INSERT INTO resultados_proporciones
+    SELECT COUNT(branch_type), branch_type, taken
+    FROM datos 
+    WHERE taken = 1 
+    GROUP BY branch_type, taken;
 
 # 7. Realizar los analisis anteriores para distintas tramas de datos de forma aleatoria, para ello se solicita tomar muestras de potencia de 10, hasta llegar a un punto en que la query tarde un tiempo maximo o cercano a 1h
 
