@@ -8,7 +8,9 @@ https://hub.docker.com/r/suhothayan/hadoop-spark-pig-hive
 
     docker run -it --name analiz -p 50070:50070 -p 8088:8088 -p 8080:8080 suhothayan/hadoop-spark-pig-hive:2.9.2 bash
 
+Agregar limitantes si es necesario : --memory="4g" --cpus="2" 
 o tambien:
+
 
     docker exec -it analiz bash
 
@@ -92,7 +94,7 @@ Para hive:
 
 Para pig:
 
-    datos = LOAD '/home/input/Datasets' 
+    datos = LOAD '/input/input' 
         USING PigStorage('\t') 
         AS (branch_type:chararray, taken:int);
 
