@@ -9,6 +9,9 @@ https://hub.docker.com/r/suhothayan/hadoop-spark-pig-hive
     docker run -it --name analiz -p 50070:50070 -p 8088:8088 -p 8080:8080 suhothayan/hadoop-spark-pig-hive:2.9.2 bash
 
 Agregar limitantes si es necesario : --memory="4g" --cpus="2" 
+
+docker update --memory="4g" --cpus="2" nombre_del_contenedor_o_id
+
 o tambien:
 
 
