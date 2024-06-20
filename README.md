@@ -106,7 +106,7 @@ Para pig:
     grouped_data = GROUP datos BY branch_type;
 
     -- Contar los elementos en cada grupo
-    counted_data = FOREACH grouped_data GENERATE group AS branch_type, COUNT(datos) AS count;
+    counted_data = FOREACH grouped_data GENERATE COUNT(datos) AS count, group AS branch_type;
 
     -- Mostrar los resultados
     DUMP counted_data;
@@ -114,12 +114,51 @@ Para pig:
 
 # 3. Analizar la relacion entre los tipos de branch y el valor de ”taken” (1 o 0) utilizando Pig y Hive
 
+Para hive
+
     SELECT COUNT(branch_type), branch_type, taken FROM datos GROUP BY branch_type, taken;
+
+Para pig:
+
+    -- Cargar los datos desde la ruta especificada
+    datos = LOAD '/input/input' 
+        USING PigStorage(',') 
+        AS (branch_addr:chararray, branch_type:chararray, taken:int, target:chararray);
+
+    -- Agrupar los datos por branch_type y taken
+    grouped_data = GROUP datos BY (branch_type, taken);
+
+    -- Contar los elementos en cada grupo y generar los resultados
+    counted_data = FOREACH grouped_data GENERATE COUNT(datos) AS count, group.branch_type AS branch_type, group.taken AS taken;
+
+    -- Mostrar los resultados
+    DUMP counted_data;
 
 
 # 4. Calcular la proporcion de registros con ”taken” igual a 1 para cada tipo de branch.
 
+para Hive
+
     SELECT COUNT(branch_type), branch_type, taken FROM datos WHERE taken = 1 GROUP BY branch_type, taken;
+
+para pig:
+
+    -- Cargar los datos desde la ruta especificada
+    datos = LOAD '/input/input' 
+        USING PigStorage(',') 
+        AS (branch_addr:chararray, branch_type:chararray, taken:int, target:chararray);
+
+    -- Filtrar los datos para incluir solo aquellos donde taken = 1
+    filtered_data = FILTER datos BY taken == 1;
+
+    -- Agrupar los datos filtrados por branch_type y taken
+    grouped_data = GROUP filtered_data BY (branch_type, taken);
+
+    -- Contar los elementos en cada grupo y generar los resultados
+    counted_data = FOREACH grouped_data GENERATE COUNT(filtered_data) AS count, group.branch_type AS branch_type, group.taken AS taken;
+
+    -- Mostrar los resultados
+    DUMP counted_data;
 
 
 # 5. Crear tablas en Hive para almacenar los resultados de los analisis realizados.
