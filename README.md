@@ -97,22 +97,20 @@ Para hive:
 
 Para pig:
 
+    -- Cargar los datos desde la ruta especificada
     datos = LOAD '/input/input' 
-        USING PigStorage('\t') 
-        AS (branch_type:chararray, taken:int);
+        USING PigStorage(',') 
+        AS (branch_addr:chararray, branch_type:chararray, taken:int, target:chararray);
 
-    -- Agrupar por branch_type y taken
-    grouped_data = GROUP datos BY (branch_type, taken);
+    -- Agrupar los datos por branch_type
+    grouped_data = GROUP datos BY branch_type;
 
-    -- Contar la frecuencia de cada tipo de branch y taken
-    counted_data = FOREACH grouped_data GENERATE
-    FLATTEN(group) AS (branch_type, taken),
-    COUNT(datos) AS frecuencia;
+    -- Contar los elementos en cada grupo
+    counted_data = FOREACH grouped_data GENERATE group AS branch_type, COUNT(datos) AS count;
 
-    -- Filtrar los registros donde taken sea 1
-    filtered_data = FILTER counted_data BY taken == 1;
+    -- Mostrar los resultados
+    DUMP counted_data;
 
-    DUMP filtered_data;
 
 # 3. Analizar la relacion entre los tipos de branch y el valor de ”taken” (1 o 0) utilizando Pig y Hive
 
